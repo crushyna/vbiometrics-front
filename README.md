@@ -1,2 +1,2 @@
 # vbiometrics_front
-Voice Biometrics Application - fron-end
+Voice Biometrics Application - front-end
