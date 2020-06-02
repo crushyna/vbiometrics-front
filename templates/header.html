@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Python Programming Test</title>
+        <title>Voice Biometrics Application</title>
         <meta name="viewport" content="width=device-width,
               initial-scale=1">
         <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
@@ -12,11 +12,11 @@
     </head>
 
 <header>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #444444;">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="/">
-            <img style="max-width:120px; margin-top: -7px;"
-                 src="{{ url_for('static', filename='images/mainlogo.png') }}">
+            <img style="max-width:120px; margin-top: 0px;"
+                 src="{{ url_for('static', filename='images/logos/title_alone_2.png') }}">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,81 +25,32 @@
 
         <div class="container-fluid">
             <ul class="nav nav-pills">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Home</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-                    <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Separated link</a>
-                    </div>
+                <li class="nav-item px-4">
+                    <a class="nav-link active bg-warning text-dark" href="/">Home</a>
                 </li>
                 {% if session.logged_in %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout/">Log out</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    <a class="nav-link bg-light text-dark" href="/logout/">Log out</a>
                 </li>
                 {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/login/">Log in</a>
+                <li class="nav-item px-2">
+                    <a class="nav-link bg-primary text-light" href="/login/">Log in</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/register/">Sign up</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                <li class="nav-item px-2">
+                    <a class="nav-link bg-light text-dark" href="/register/">Sign up</a>
                 </li>
                 {% endif %}
             </ul>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
+            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                <ul class="navbar-nav pull-right">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                        <a class="nav-link" href="/about/">About</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          My own Dropdown</a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact_us/">Contact Us</a>
                     </li>
-
                 </ul>
-                <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                  Launch demo modal
-                </button>
-
-                <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        ...
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
             </div>
         </div>
     </nav>
