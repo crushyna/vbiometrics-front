@@ -1,5 +1,7 @@
 import gc
-from flask import Flask, render_template, flash, url_for, redirect, session
+import os
+
+from flask import Flask, render_template, flash, url_for, redirect, session, request
 
 from content.authentication import Authentication
 from content.authorization import Authorization
@@ -9,6 +11,10 @@ TOPIC_DICT = Content()
 
 app = Flask(__name__)
 app.secret_key = b'crushyna'
+
+UPLOAD_FOLDER = 'wavefiles'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 
 # TODO: It might be actually good idea to define separate directory for every function down below
@@ -60,6 +66,25 @@ def logout():
 def authentication():
     template = Authentication.check_email()
     return template
+
+
+@app.route("/record_voice")
+def record_voice():
+    return render_template('record_voice.html')
+
+
+@app.route('/audio', methods=['POST'])
+def audio():
+    with open(os.path.join(UPLOAD_FOLDER, 'audio.wav'), 'wb') as f:
+        f.write(request.data)
+    # proc = run(['ffprobe', '-of', 'default=noprint_wrappers=1', os.path.join(UPLOAD_FOLDER, 'audio.wav')], text=True,
+    #           stderr=PIPE)
+    # return f"File saved: {os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))}"
+    if os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav')):
+        session['authenticated'] = True
+        print("File saved!")
+
+    return "OK"
 
 
 # ONLY Error handling below #
