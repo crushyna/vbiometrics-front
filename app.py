@@ -85,7 +85,7 @@ def audio():
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
         os.remove(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
-        return f"File saved: {file_saved_flag}, file deleted after saving: {file_deleted_flag}"
+        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
     else:
         return "File not saved!"
 
