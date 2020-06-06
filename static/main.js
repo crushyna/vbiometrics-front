@@ -44,7 +44,7 @@ function stopRecording() {
     document.getElementById('stop').disabled = true;
     document.getElementById('start').removeAttribute('disabled');
     audioRecorder.getBuffers(gotBuffers);
-    location.reload()
+    // location.reload()
 }
 
 function startRecording() {

@@ -75,16 +75,16 @@ def record_voice():
 
 @app.route('/audio', methods=['POST'])
 def audio():
-    with open(os.path.join(UPLOAD_FOLDER, 'audio.wav'), 'wb') as f:
+    with open(os.path.join(UPLOAD_FOLDER, 'audio.wav'), 'wb+') as f:
         f.write(request.data)
     # proc = run(['ffprobe', '-of', 'default=noprint_wrappers=1', os.path.join(UPLOAD_FOLDER, 'audio.wav')], text=True,
     #           stderr=PIPE)
     # return f"File saved: {os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))}"
     if os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav')):
         session['authenticated'] = True
-        print("File saved!")
-
-    return "OK"
+        return f"File saved: {os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))}"
+    else:
+        return "File not saved!"
 
 
 # ONLY Error handling below #
