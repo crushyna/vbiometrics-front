@@ -1,10 +1,10 @@
 import gc
+from time import sleep
 
-from flask import request, flash, session, url_for, redirect, render_template
-from passlib.handlers.sha2_crypt import sha256_crypt
-
+import requests
+from flask import request, flash, session, url_for, redirect, render_template, json
+from passlib.handlers.sha2_crypt import sha512_crypt
 from content.forms.registration_form import RegistrationForm
-from dbconnect import connection
 
 
 class Authorization:
@@ -15,33 +15,33 @@ class Authorization:
             form = RegistrationForm(request.form)
 
             if request.method == "POST" and form.validate():
-                username = form.username.data
                 email = form.email.data
+                merchant_id = form.merchant_id
+                password = form.password.data
 
-                # TODO: sha512 registration maybe?
-                password = sha256_crypt.hash((str(form.password.data)))
-                c, conn = connection()
+                url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{email}"
+                response = requests.request("GET", url)
 
-                x = c.execute("SELECT * FROM users WHERE username = (%s);", (username,))
-                row_count = c.rowcount
+                if response.status_code not in (200, 201):  # if user DOES NOT exist
 
-                if row_count == 0:
-                    query = "INSERT INTO users (username, password, email, tracking) VALUES (%s, %s, %s, %s);"
-                    values = (username, password, email, "/introduction-to-python-programming/")
-                    c.execute(query, values)
-                    conn.commit()
-                    flash("Thanks for registering!")
-                    c.close()
-                    conn.close()
-                    gc.collect()
+                    url = "https://vbiometrics-docker.azurewebsites.net/add_new_user/"
+                    payload = {"user_email": email,
+                               "merchant_id": merchant_id,
+                               "password": sha512_crypt.hash(password)}
+                    headers = {'Content-Type': 'application/json'}
+                    response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
-                    session['logged_in'] = True
-                    session['username'] = username
+                    if response.status_code in (200, 201):  # if user added successfully
+                        gc.collect()
+                        session['logged_in'] = True
+                        session['email'] = email
 
-                    return redirect(url_for('dashboard'))
+                    else:
+                        flash("Wrong password or server error!")
+                        return redirect(url_for('dashboard'))
 
                 else:
-                    flash("That username is already taken, please choose another!")
+                    flash("That email is already taken, please choose another!")
                     return render_template('register.html', form=form)
 
             else:
@@ -54,23 +54,21 @@ class Authorization:
     def login_page():
         error = ''
         try:
-            c, conn = connection()
             if request.method == 'POST':
-                data = c.execute("SELECT * FROM users WHERE username = (%s);", (request.form['username'],))
+                url = "https://vbiometrics-docker.azurewebsites.net/user_login/"
+                payload = {"merchant_id": request.form['merchant_id'],
+                           "user_email": request.form['email'],
+                           "password": sha512_crypt.hash(request.form['password'])}
+                headers = {'Content-Type': 'application/json'}
+                response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
-                if c.rowcount != 0:  # if user exists
-                    data_password = c.fetchone()[2]  # get his password
+                if response.status_code in (200, 201):
+                    session['logged_in'] = True
+                    session['email'] = request.form['email']
 
-                    # TODO: if sha512 registration, then change here also
-                    if sha256_crypt.verify(request.form['password'], data_password):  # check his password
-                        session['logged_in'] = True
-                        session['username'] = request.form['username']
-
-                        flash("You are now logged in")
-                        return redirect(url_for("dashboard"))
-
-                    else:
-                        error = "Invalid credentials, try again!"
+                    flash("You are now logged in")
+                    sleep(2)
+                    return redirect(url_for("dashboard"))
 
                 else:
                     error = "Invalid credentials, try again!"
@@ -80,5 +78,5 @@ class Authorization:
 
         except Exception as e:
             flash(e)
-            error = "Invalid credentials, try again!"
+            error = "Invalid credentials or request method, try again!"
             return render_template("login.html", error=error)

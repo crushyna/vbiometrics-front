@@ -8,7 +8,8 @@
     <h4>Please log in:</h4>
     <br>
     <form action="" class="form-inline" method="post">
-        <input type="text" class="form-control" placeholder="Username" name="username" value="{{request.form.username}}">
+        <input type="email" class="form-control" placeholder="E-mail" name="email" value="{{request.form.email}}">
+        <input type="number" class="form-control" placeholder="Merchant ID" name="merchant_id" value="{{request.form.merchant_id}}">
         <input type="password" class="form-control" placeholder="Password" name="password" value="{{request.form.password}}">
         <input class="btn btn-primary" type="submit" value="Login">
     </form>
