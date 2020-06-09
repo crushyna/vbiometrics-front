@@ -33,6 +33,7 @@ class Authorization:
                         gc.collect()
                         session['logged_in'] = True
                         session['email'] = email
+                        # return redirect(url_for('registration_record_voice'))
                         return redirect(url_for('dashboard'))
 
                     else:
