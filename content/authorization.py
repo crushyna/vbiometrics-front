@@ -73,6 +73,8 @@ class Authorization:
 
                 else:
                     error = "Invalid credentials, try again!"
+                    session.clear()
+                    return render_template('login.html', error=error)
 
             gc.collect()
             return render_template('login.html', error=error)
