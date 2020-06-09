@@ -2,7 +2,7 @@ from wtforms import Form, StringField, PasswordField, validators, BooleanField
 
 
 class RegistrationForm(Form):
-    email = StringField('Email Address', [validators.Length(min=6, max=20),
+    email = StringField('Email Address', [validators.Length(min=6, max=40),
                                           validators.Email(message="Email address syntax error!")])
     merchant_id = StringField('Merchant ID', [validators.Length(min=6, max=6)])
     password = PasswordField('Password', [validators.DataRequired(),

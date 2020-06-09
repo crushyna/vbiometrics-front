@@ -37,7 +37,6 @@ def home_page():
 
 @app.route('/dashboard/')
 def dashboard():
-    flash("Well hello there!")
     return render_template("content_dashboard.html", TOPIC_DICT=TOPIC_DICT)
 
 

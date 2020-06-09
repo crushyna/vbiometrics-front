@@ -1,5 +1,4 @@
 import gc
-from time import sleep
 import requests
 from flask import request, flash, session, url_for, redirect, render_template, json
 from content.forms.registration_form import RegistrationForm
@@ -68,7 +67,6 @@ class Authorization:
                     session['email'] = request.form['email']
 
                     flash("You are now logged in")
-                    sleep(2)
                     return redirect(url_for("dashboard"))
 
                 else:
