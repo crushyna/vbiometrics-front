@@ -36,10 +36,14 @@ class Authorization:
                         # return redirect(url_for('registration_record_voice'))
                         return redirect(url_for('dashboard'))
 
+                    elif response.status_code == 409:
+                        flash("User with this email already exists!")
+                        return redirect(url_for('register'))
+
                     else:
                         error = response.json()
                         flash(f"error {error}")
-                        return redirect(url_for('dashboard'))
+                        return redirect(url_for('register'))
 
                 else:
                     flash("That email is already taken, please choose another!")
