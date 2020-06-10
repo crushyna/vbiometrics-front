@@ -13,7 +13,7 @@ class Authentication:
             error = ''
             try:
                 if request.method == 'POST':
-                    url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{request.form['email']}"
+                    url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{request.form['email']}/{request.form['merchant_id']} "
                     response = requests.get(url)
 
                     if response.status_code not in (200, 201):
