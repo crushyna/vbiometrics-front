@@ -83,7 +83,7 @@ def audio():
         session['authenticated'] = True
 
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
-        os.remove(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
+        # os.remove(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
 
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
@@ -98,7 +98,7 @@ def registration_record_voice():
 
 @app.route('/register/record_voice/audio', methods=['POST'])
 def registration_save_audio():
-    next_filename = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S')}"
+    next_filename = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
     with open(os.path.join(UPLOAD_FOLDER, next_filename), 'wb+') as f:
         f.write(request.data)
 
