@@ -2,7 +2,7 @@ import gc
 import os
 import datetime
 from flask import Flask, render_template, flash, url_for, redirect, session, request
-
+from helpers.user_check import NewUserModel
 from content.authentication import Authentication
 from content.authorization import Authorization
 from content_management import Content
@@ -113,9 +113,20 @@ def audio():
         return "File not saved!"
 
 
-@app.route('/check_session/', methods=['GET'])
+@app.route('/check_session/')
 def check_session():
-    return "Session checker!"
+    if 'logged_in' not in session:
+        return redirect(url_for('home_page'))
+
+    new_user = NewUserModel()
+    new_user.set_of_text_ids = new_user.get_initial_list_of_texts()
+
+    while len(new_user.set_of_text_ids) < 3:
+        new_user.set_of_text_ids = new_user.get_missing_texts()
+
+    return str(new_user.set_of_text_ids)
+
+        # return "Session checker!"
 
 
 # ONLY Error handling below #
