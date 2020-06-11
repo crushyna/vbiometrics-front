@@ -9,12 +9,14 @@ from content_management import Content
 
 TOPIC_DICT = Content()
 
-app = Flask(__name__)
-app.secret_key = b'crushyna'
-
 UPLOAD_FOLDER = 'wavefiles'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+ALLOWED_EXTENSIONS = {'wav'}
+
+app = Flask(__name__)
+app.secret_key = b'crushyna'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 # TODO: It might be actually good idea to define separate directory for every function down below
@@ -109,6 +111,11 @@ def audio():
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
     else:
         return "File not saved!"
+
+
+@app.route('/check_session/', methods=['GET'])
+def check_session():
+    return "Session checker!"
 
 
 # ONLY Error handling below #

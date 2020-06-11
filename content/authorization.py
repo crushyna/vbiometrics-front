@@ -30,9 +30,12 @@ class Authorization:
                     response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
                     if response.status_code in (200, 201):  # if user added successfully
+                        user_id = response.json()['message']['data']['userId']
                         gc.collect()
                         session['logged_in'] = True
                         session['email'] = email
+                        session['user_id'] = user_id
+                        session['merchant_id'] = merchant_id
                         return redirect(url_for('register_record_voice'))
                         # return redirect(url_for('dashboard'))
 
