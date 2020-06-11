@@ -114,12 +114,12 @@ def registration_save_audio():
 # ONLY Error handling below #
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template("errors/404.html")
+    return render_template("errors/404.html"), 404
 
 
 @app.errorhandler(405)
 def method_not_found(e):
-    return render_template("errors/405.html")
+    return render_template("errors/405.html"), 405
 
 
 if __name__ == "__main__":

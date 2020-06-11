@@ -32,9 +32,53 @@ function gotBuffers(buffers) {
 
 function doneEncoding(soundBlob) {
     // fetch('/audio', {method: "POST", body: soundBlob}).then(response => $('#output').text(response.text()))
-    fetch('/audio', {method: "POST", body: soundBlob}).then(response => response.text().then(text => {
-        document.getElementById('output').value = text;
-    }));
+    // fetch('/audio', {method: "POST", body: soundBlob}).then(response => response.text().then(text => {
+    //     document.getElementById('output').value = text;
+    // }));
+
+
+    fetch('/audio', {method: "POST", body: soundBlob})
+        .then(response => {
+            response.text().then(text => document.getElementById('output').value = text);
+            let message = document.createElement('div');
+            let paragraph = document.querySelector("html>body.text-center>div.form-signin>div.container>p");
+            paragraph.insertBefore(message, paragraph.firstChild);
+            message.style.fontSize = "1.5em";
+                if (response.status == 200){
+                    console.log(response);
+                    paragraph.style.color = "green";
+                    message.innerText = 'No gratki, nagrałeś głos, za niecałe 5 sekund zostaniesz przekierowany do systemu...';
+                    let counter = document.createElement('div');
+                    paragraph.insertBefore(counter, message.nextElementSibling);
+                    counter.style.fontSize = "2em";
+                    let time = 5;
+                        let countdown = setInterval(function () {
+                            counter.innerText = time;
+                            --time;
+                            if (time < 0){
+                                clearInterval(countdown);
+                                document.location = document.location.protocol+ "//" + document.location.hostname;
+                            }
+                        }
+                        ,1000);
+
+                    // async function sleep(ms) {
+                    //     await new Promise(r => setTimeout(r => {
+                    //
+                    //     }, ms));
+                    // }
+                    // sleep(5000);
+                }else{
+                    throw response.status;
+                }
+        })
+        .catch(function(err){
+            console.log(err);
+            paragraph.style.color = "red";
+            message.innerText = 'Ooops! Coś poszło nie tak (error ' + err + ')';
+
+        });
+
     recIndex++;
 }
 
