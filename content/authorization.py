@@ -17,7 +17,7 @@ class Authorization:
                 merchant_id = form.merchant_id.data
                 password = form.password.data
 
-                url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{email}"
+                url = f"https://vbiometrics-docker.azurewebsites.net/check_if_user_exists/{merchant_id}/{email}"
                 response = requests.request("GET", url)
 
                 if response.status_code not in (200, 201):  # if user DOES NOT exist
