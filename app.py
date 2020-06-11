@@ -46,6 +46,26 @@ def register():
     return template
 
 
+@app.route("/register/record_voice")
+def registration_record_voice():
+    return render_template('registration/register_record_voice.html')
+
+
+@app.route('/register/record_voice/audio', methods=['POST'])
+def registration_save_audio():
+    next_filename = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
+    with open(os.path.join(UPLOAD_FOLDER, next_filename), 'wb+') as f:
+        f.write(request.data)
+
+    if os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename)):
+        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename))
+        os.remove(os.path.join(UPLOAD_FOLDER, next_filename))
+        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename))
+        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
+    else:
+        return "File not saved!"
+
+
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     template = Authorization.login_page()
@@ -86,26 +106,6 @@ def audio():
         # os.remove(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
 
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
-        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
-    else:
-        return "File not saved!"
-
-
-@app.route("/register/record_voice")
-def registration_record_voice():
-    return render_template('record_voice.html')
-
-
-@app.route('/register/record_voice/audio', methods=['POST'])
-def registration_save_audio():
-    next_filename = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
-    with open(os.path.join(UPLOAD_FOLDER, next_filename), 'wb+') as f:
-        f.write(request.data)
-
-    if os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename)):
-        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename))
-        os.remove(os.path.join(UPLOAD_FOLDER, next_filename))
-        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename))
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
     else:
         return "File not saved!"

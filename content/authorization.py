@@ -33,8 +33,8 @@ class Authorization:
                         gc.collect()
                         session['logged_in'] = True
                         session['email'] = email
-                        # return redirect(url_for('registration_record_voice'))
-                        return redirect(url_for('dashboard'))
+                        return redirect(url_for('registration_record_voice'))
+                        # return redirect(url_for('dashboard'))
 
                     elif response.status_code == 409:
                         flash("User with this email already exists!")
@@ -47,10 +47,10 @@ class Authorization:
 
                 else:
                     flash("That email is already taken, please choose another!")
-                    return render_template('register.html', form=form)
+                    return render_template('registration/register.html', form=form)
 
             else:
-                return render_template('register.html', form=form)
+                return render_template('registration/register.html', form=form)
 
         except Exception as e:
             return str(e)
