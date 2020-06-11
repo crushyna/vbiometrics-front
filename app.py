@@ -46,13 +46,13 @@ def register():
     return template
 
 
-@app.route("/register/record_voice")
-def registration_record_voice():
-    return render_template('registration/register_record_voice.html')
+@app.route("/register_record_voice")
+def register_record_voice():
+    return render_template('register_record_voice.html')
 
 
-@app.route('/register/record_voice/audio', methods=['POST'])
-def registration_save_audio():
+@app.route('/register_record_voice_audio', methods=['POST'])
+def register_save_audio():
     next_filename = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
     with open(os.path.join(UPLOAD_FOLDER, next_filename), 'wb+') as f:
         f.write(request.data)

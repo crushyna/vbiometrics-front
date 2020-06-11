@@ -37,7 +37,7 @@ function doneEncoding(soundBlob) {
     // }));
 
 
-    fetch('/register/record_voice/audio', {method: "POST", body: soundBlob})
+    fetch('/register_record_voice_audio', {method: "POST", body: soundBlob})
         .then(response => {
             response.text().then(text => document.getElementById('output').value = text);
             let message = document.createElement('div');
@@ -57,7 +57,7 @@ function doneEncoding(soundBlob) {
                             --time;
                             if (time < 0){
                                 clearInterval(countdown);
-                                document.location = document.location.protocol+ "//" + document.location.hostname;
+                                document.location = document.location.protocol+ "//" + document.location.hostname + "/dashboard";
                             }
                         }
                         ,1000);
