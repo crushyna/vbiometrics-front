@@ -9,13 +9,13 @@ class NewUserModel:
         self.email = session['email']
         self.merchant_id = session['merchant_id']
         self.initial_num_of_samples = 0
-        self.num_of_required_texts = 3
+        self.num_of_required_texts = 9
         self.set_of_text_ids = {}
         self.set_number_of_missing_samples = {}
         self.set_of_texts_full = {}
 
     def get_initial_list_of_texts(self):
-        url = f"https://dbapi.pl/samples/byUserId/{self.merchant_id}/{self.user_id}"
+        url = f"https://vbiometrics-docker.azurewebsites.net/samples/byUserId/{self.merchant_id}/{self.user_id}"
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
             return {'message': 'Database or connection error! @ get_list_of_texts',
@@ -31,8 +31,8 @@ class NewUserModel:
 
     def get_missing_texts(self):
         # TODO: it never can get more than 3 this way!
-        number_of_missing_texts = self.num_of_required_texts - len(self.set_of_text_ids)
-        url = f"https://dbapi.pl/texts/random/{number_of_missing_texts}"
+        number_of_missing_texts = self.num_of_required_texts - len(self.set_of_text_ids)    # 9 - 3
+        url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"                    # = 6
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
             return {'message': 'Database or connection error! @ get_missing_texts',
@@ -46,12 +46,12 @@ class NewUserModel:
             new_texts_id.append(each_element['textId'])
             new_texts_phrases.append(each_element['phrase'])
 
-        self.num_of_required_texts = self.num_of_required_texts - len(self.set_of_text_ids) - len(set(new_texts_id))
+        self.num_of_required_texts = self.num_of_required_texts - len(self.set_of_text_ids) - len(set(new_texts_id))        # 9 - 3 - 6     # = 0
 
         return set(new_texts_id), dict(zip(set(new_texts_id), set(new_texts_phrases)))
 
     def get_missing_samples(self):
-        url = f"https://dbapi.pl/samples/byUserId/{self.merchant_id}/{self.user_id}"
+        url = f"https://vbiometrics-docker.azurewebsites.net/samples/byUserId/{self.merchant_id}/{self.user_id}"
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
             return {'message': 'Database or connection error! @ get_missing_samples',

@@ -57,7 +57,7 @@ def register_record_voice():
 
 @app.route('/register_record_voice_audio', methods=['POST'])
 def register_save_audio():
-    session['next_filename'] = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
+    session['next_filename'] = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}.wav"
     with open(os.path.join(UPLOAD_FOLDER, session['next_filename']), 'wb+') as f:
         f.write(request.data)
 
@@ -79,7 +79,9 @@ def register_save_audio():
         elif response_array_upload.status_code == 500:
             return "error while sending npy file to database", 500
 
+
         # delete from web browser cache:
+        files = False
         os.remove(os.path.join(UPLOAD_FOLDER, session['next_filename']))
 
         # check if deleted:
@@ -152,9 +154,11 @@ def check_session():
     while len(new_user.set_of_text_ids) < new_user.num_of_required_texts:
         new_user.set_of_text_ids, new_user.set_of_texts_full = new_user.get_missing_texts()
 
-    # return str(len(new_user.set_of_text_ids)) + str(new_user.num_of_required_texts)
+    # return str(new_user.set_of_text_ids)
+    # return str(new_user.set_of_texts_full)    # all ok to this point
 
     new_user.set_number_of_missing_samples = new_user.get_missing_samples()
+
     session['recordings'] = new_user.set_number_of_missing_samples
     session['texts'] = new_user.set_of_texts_full
 
