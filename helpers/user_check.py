@@ -8,6 +8,7 @@ class NewUserModel:
         self.user_id = session['user_id']
         self.email = session['email']
         self.merchant_id = session['merchant_id']
+        self.num_of_required_texts = 3
         self.set_of_text_ids = {}
         self.set_number_of_missing_samples = {}
         self.set_of_texts_full = {}
@@ -29,7 +30,7 @@ class NewUserModel:
 
     def get_missing_texts(self):
         # TODO: it never can get more than 3 this way!
-        number_of_missing_texts = 3 - len(self.set_of_text_ids)
+        number_of_missing_texts = self.num_of_required_texts - len(self.set_of_text_ids)
         url = f"https://dbapi.pl/texts/random/{number_of_missing_texts}"
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
@@ -43,6 +44,8 @@ class NewUserModel:
         for each_element in response_data['data']['texts']:
             new_texts_id.append(each_element['textId'])
             new_texts_phrases.append(each_element['phrase'])
+
+        self.num_of_required_texts = self.num_of_required_texts - len(self.set_of_text_ids) - len(set(new_texts_id))
 
         return set(new_texts_id), dict(zip(set(new_texts_id), set(new_texts_phrases)))
 
