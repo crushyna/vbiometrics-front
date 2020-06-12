@@ -10,6 +10,7 @@ class NewUserModel:
         self.merchant_id = session['merchant_id']
         self.set_of_text_ids = {}
         self.set_number_of_missing_samples = {}
+        self.set_of_texts_full = {}
 
     def get_initial_list_of_texts(self):
         url = f"https://dbapi.pl/samples/byUserId/{self.merchant_id}/{self.user_id}"
@@ -27,6 +28,7 @@ class NewUserModel:
         return set(text_id_list)
 
     def get_missing_texts(self):
+        # TODO: it never can get more than 3 this way!
         number_of_missing_texts = 3 - len(self.set_of_text_ids)
         url = f"https://dbapi.pl/texts/random/{number_of_missing_texts}"
         response = requests.request("GET", url)
@@ -35,14 +37,33 @@ class NewUserModel:
                     'status': 'error'}
 
         new_texts_id = []
+        new_texts_phrases = []
         response_data = response.json()
 
         for each_element in response_data['data']['texts']:
             new_texts_id.append(each_element['textId'])
+            new_texts_phrases.append(each_element['phrase'])
 
-        return set(new_texts_id)
+        return set(new_texts_id), dict(zip(set(new_texts_id), set(new_texts_phrases)))
 
+    def get_missing_samples(self):
+        url = f"https://dbapi.pl/samples/byUserId/{self.merchant_id}/{self.user_id}"
+        response = requests.request("GET", url)
+        if response.status_code not in (200, 201):
+            return {'message': 'Database or connection error! @ get_missing_samples',
+                    'status': 'error'}
 
+        response_data = response.json()
+        result_dict = {}
+
+        for each_text_id in self.set_of_text_ids:
+            count_sum = 0
+            for each_element in response_data['data']:
+                if each_element['textId'] == each_text_id:
+                    count_sum += 1
+            result_dict.update({each_text_id: 3 - count_sum})
+
+        return result_dict
 
 
 

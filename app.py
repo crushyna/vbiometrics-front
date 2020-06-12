@@ -116,17 +116,31 @@ def audio():
 @app.route('/check_session/')
 def check_session():
     if 'logged_in' not in session:
-        return redirect(url_for('home_page'))
+        return redirect(url_for('register'))
 
     new_user = NewUserModel()
     new_user.set_of_text_ids = new_user.get_initial_list_of_texts()
 
+    # return str(len(new_user.set_of_text_ids))
+
     while len(new_user.set_of_text_ids) < 3:
-        new_user.set_of_text_ids = new_user.get_missing_texts()
+        new_user.set_of_text_ids, new_user.set_of_texts_full = new_user.get_missing_texts()
 
-    return str(new_user.set_of_text_ids)
+    # return str(new_user.set_of_text_ids)
 
-        # return "Session checker!"
+    new_user.set_number_of_missing_samples = new_user.get_missing_samples()
+    session['recordings'] = new_user.set_number_of_missing_samples
+    session['texts'] = new_user.set_of_texts_full
+
+    # return str(new_user.set_of_text_ids) + str(new_user.set_number_of_missing_samples)
+
+    for each_key, each_value in session['recordings'].items():
+        return render_template('register_record_voice.html',  message=(each_key, each_value, session['texts'][each_key]))
+        # return redirect(url_for('register_record_voice', message="test_string"))
+
+    #return session['recordings']
+
+    # return "Session checker!"
 
 
 # ONLY Error handling below #
