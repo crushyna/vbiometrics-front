@@ -14,12 +14,12 @@
             <button id="start" class="btn btn-success" onclick="startRecording()" disabled>Start</button>
             <button id="stop" class="btn btn-danger" onclick="stopRecording()" disabled>Stop</button>
         </p>
-        <p class="text-dark bg-warning font-weight-bold">Text ID: {{message[0]}}</p>
-        <p class="text-dark bg-warning font-weight-bold">Required recordings: {{message[1]}}</p>
-        <p class="text-dark bg-warning font-weight-bold">Text-phrase: {{message[2]}}</p>
-        <p class="text-dark bg-info font-weight-bold">merchant_id: {{message[3]}}</p>
-        <p class="text-dark bg-info font-weight-bold">user_id: {{message[4]}}</p>
-        <p class="text-dark bg-info font-weight-bold">text_id: {{message[0]}}</p>
+        <p class="text-dark bg-warning font-weight-bold">Text ID: {{session['next_recording_data'][0]}}</p>
+        <p class="text-dark bg-warning font-weight-bold">Required recordings: {{session['next_recording_data'][1]}}</p>
+        <p class="text-dark bg-warning font-weight-bold">Text-phrase: {{session['next_recording_data'][2]}}</p>
+        <p class="text-dark bg-info font-weight-bold">merchant_id: {{session['next_recording_data'][3]}}</p>
+        <p class="text-dark bg-info font-weight-bold">user_id: {{session['next_recording_data'][4]}}</p>
+        <p class="text-dark bg-info font-weight-bold">text_id: {{session['next_recording_data'][0]}}</p>
         <p class="text-dark bg-danger font-weight-bold">{{error}}</p>
         <textarea id="output" style="width: 100%;height: 100px" readonly></textarea>
     </div>

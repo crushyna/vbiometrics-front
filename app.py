@@ -55,14 +55,14 @@ def register_record_voice():
 
 @app.route('/register_record_voice_audio', methods=['POST'])
 def register_save_audio():
-    next_filename = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
-    with open(os.path.join(UPLOAD_FOLDER, next_filename), 'wb+') as f:
+    session['next_filename'] = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}"
+    with open(os.path.join(UPLOAD_FOLDER, session['next_filename']), 'wb+') as f:
         f.write(request.data)
 
-    if os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename)):
-        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename))
-        os.remove(os.path.join(UPLOAD_FOLDER, next_filename))
-        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, next_filename))
+    if os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename'])):
+        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
+        # os.remove(os.path.join(UPLOAD_FOLDER, session['next_filename']))
+        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
     else:
         return "File not saved!"
@@ -132,11 +132,14 @@ def check_session():
     session['recordings'] = new_user.set_number_of_missing_samples
     session['texts'] = new_user.set_of_texts_full
 
+
     # return str(new_user.set_of_text_ids) + str(new_user.set_number_of_missing_samples)
 
     for each_key, each_value in session['recordings'].items():
-        return render_template('register_record_voice.html',  message=(each_key, each_value, session['texts'][each_key], session['merchant_id'], session['user_id']))
-        # return redirect(url_for('register_record_voice', message="test_string"))
+        # return render_template('register_record_voice.html',  message=(each_key, each_value, session['texts'][each_key], session['merchant_id'], session['user_id']))
+        data = (each_key, each_value, session['texts'][each_key], session['merchant_id'], session['user_id'])
+        session['next_recording_data'] = data
+        return redirect(url_for('register_record_voice'))
 
     #return session['recordings']
 
