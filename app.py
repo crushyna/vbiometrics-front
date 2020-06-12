@@ -1,6 +1,8 @@
 import gc
 import os
 import datetime
+
+import requests
 from flask import Flask, render_template, flash, url_for, redirect, session, request
 from helpers.user_check import NewUserModel
 from content.authentication import Authentication
@@ -61,9 +63,29 @@ def register_save_audio():
 
     if os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename'])):
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
-        # os.remove(os.path.join(UPLOAD_FOLDER, session['next_filename']))
+
+        # send to back-end
+        url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['next_filename']}"
+        files = [('file', open(os.path.join(UPLOAD_FOLDER, session['next_filename']), 'rb'))]
+
+        response_send_wavefile = requests.request("POST", url_upload_wavefile, files=files)
+        if response_send_wavefile.status_code == 400:
+            return "error while sending wavefile to back-end server!", 400
+
+        url_array_upload = f"https://vbiometrics-docker.azurewebsites.net/array_upload/{session['next_recording_data'][3]}/{session['next_recording_data'][4]}/{session['next_recording_data'][0]}/{session['next_filename']}"
+        response_array_upload = requests.request("POST", url_array_upload)
+        if response_array_upload.status_code == 400:
+            return "error while sending npy file to database!", 400
+        elif response_array_upload.status_code == 500:
+            return "error while sending npy file to database", 500
+
+        # delete from web browser cache:
+        os.remove(os.path.join(UPLOAD_FOLDER, session['next_filename']))
+
+        # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
-        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
+
+        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}, send to backend status code: {str(response_send_wavefile.status_code)}, upload npy status code: {str(response_array_upload.status_code)}"
     else:
         return "File not saved!"
 
@@ -119,7 +141,11 @@ def check_session():
         return redirect(url_for('register'))
 
     new_user = NewUserModel()
-    new_user.set_of_text_ids = new_user.get_initial_list_of_texts()
+    new_user.set_of_text_ids, new_user.initial_num_of_samples = new_user.get_initial_list_of_texts()
+
+    if new_user.initial_num_of_samples >= 9:
+        session.clear()
+        return render_template('login.html')
 
     # return str(len(new_user.set_of_text_ids))
 
@@ -132,7 +158,6 @@ def check_session():
     session['recordings'] = new_user.set_number_of_missing_samples
     session['texts'] = new_user.set_of_texts_full
 
-
     # return str(new_user.set_of_text_ids) + str(new_user.set_number_of_missing_samples)
 
     for each_key, each_value in session['recordings'].items():
@@ -140,10 +165,6 @@ def check_session():
         data = (each_key, each_value, session['texts'][each_key], session['merchant_id'], session['user_id'])
         session['next_recording_data'] = data
         return redirect(url_for('register_record_voice'))
-
-    #return session['recordings']
-
-    # return "Session checker!"
 
 
 # ONLY Error handling below #

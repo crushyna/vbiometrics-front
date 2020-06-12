@@ -8,6 +8,7 @@ class NewUserModel:
         self.user_id = session['user_id']
         self.email = session['email']
         self.merchant_id = session['merchant_id']
+        self.initial_num_of_samples = 0
         self.num_of_required_texts = 3
         self.set_of_text_ids = {}
         self.set_number_of_missing_samples = {}
@@ -26,7 +27,7 @@ class NewUserModel:
         for each_element in response_data['data']:
             text_id_list.append(each_element['textId'])
 
-        return set(text_id_list)
+        return set(text_id_list), len(text_id_list)
 
     def get_missing_texts(self):
         # TODO: it never can get more than 3 this way!
