@@ -31,7 +31,7 @@ class NewUserModel:
         return set(text_id_list), len(text_id_list)
 
     def get_missing_texts(self):
-        number_of_missing_texts = self.num_of_total_required_texts - len(self.set_of_text_ids)                  # 3 - 0
+        number_of_missing_texts = self.num_of_total_required_texts - len(self.set_of_text_ids)                  # 3 - 0     3 - 3
         url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"            # = 6
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
