@@ -145,19 +145,29 @@ def check_session():
     new_user = NewUserModel()
     new_user.set_of_text_ids, new_user.initial_num_of_samples = new_user.get_initial_list_of_texts()
 
+    # return str(new_user.set_of_text_ids)
+
     if new_user.initial_num_of_samples >= 9:
         session.clear()
         return render_template('login.html')
 
-    # return str(len(new_user.set_of_text_ids))
+    # return "Initial number of samples: " + str(new_user.initial_num_of_samples)                       # 0
+    # return "Set of text ID's: " + str(new_user.set_of_text_ids)                                       # empty set (0)
+    # return "New user ID: " + str(new_user.user_id)                                                    # 113864
+    # return "Number of total required texts: " + str(new_user.num_of_total_required_texts)             # 3
+    # return "Number of total required recordings: " + str(new_user.num_of_total_required_samples)      # 9
 
-    while len(new_user.set_of_text_ids) < new_user.num_of_required_texts:
+    while len(new_user.set_of_text_ids) < new_user.num_of_total_required_texts:
         new_user.set_of_text_ids, new_user.set_of_texts_full = new_user.get_missing_texts()
 
     # return str(new_user.set_of_text_ids)
-    # return str(new_user.set_of_texts_full)    # all ok to this point
+    # return str(new_user.set_of_texts_full)
+    # return "Current number of total required texts: " + str(new_user.num_of_total_required_texts)
+    # return "Current number of total required recordings: " + str(new_user.num_of_total_required_samples)
 
     new_user.set_number_of_missing_samples = new_user.get_missing_samples()
+
+    # return "Set number of missing samples: " + str(new_user.set_number_of_missing_samples)
 
     session['recordings'] = new_user.set_number_of_missing_samples
     session['texts'] = new_user.set_of_texts_full

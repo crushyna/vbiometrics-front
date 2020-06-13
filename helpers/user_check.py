@@ -9,7 +9,8 @@ class NewUserModel:
         self.email = session['email']
         self.merchant_id = session['merchant_id']
         self.initial_num_of_samples = 0
-        self.num_of_required_texts = 9
+        self.num_of_total_required_samples = 9
+        self.num_of_total_required_texts = 3
         self.set_of_text_ids = {}
         self.set_number_of_missing_samples = {}
         self.set_of_texts_full = {}
@@ -30,9 +31,8 @@ class NewUserModel:
         return set(text_id_list), len(text_id_list)
 
     def get_missing_texts(self):
-        # TODO: it never can get more than 3 this way!
-        number_of_missing_texts = self.num_of_required_texts - len(self.set_of_text_ids)    # 9 - 3
-        url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"                    # = 6
+        number_of_missing_texts = self.num_of_total_required_texts - len(self.set_of_text_ids)                  # 3 - 0
+        url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"            # = 6
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
             return {'message': 'Database or connection error! @ get_missing_texts',
@@ -46,7 +46,7 @@ class NewUserModel:
             new_texts_id.append(each_element['textId'])
             new_texts_phrases.append(each_element['phrase'])
 
-        self.num_of_required_texts = self.num_of_required_texts - len(self.set_of_text_ids) - len(set(new_texts_id))        # 9 - 3 - 6     # = 0
+        self.num_of_total_required_texts = self.num_of_total_required_texts - len(self.set_of_text_ids) - len(set(new_texts_id))        # 3 - 0 - 3     # = 0
 
         return set(new_texts_id), dict(zip(set(new_texts_id), set(new_texts_phrases)))
 
