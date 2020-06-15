@@ -46,8 +46,11 @@ def dashboard():
 
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
-    template = Authorization.register_page()
-    return template
+    if 'in_recording_session' not in session:
+        template = Authorization.register_page()
+        return template
+    else:
+        return redirect(url_for('check_session'))
 
 
 @app.route("/register_record_voice")
@@ -78,7 +81,6 @@ def register_save_audio():
             return "error while sending npy file to database!", 400
         elif response_array_upload.status_code == 500:
             return "error while sending npy file to database", 500
-
 
         # delete from web browser cache:
         files = False
@@ -139,50 +141,36 @@ def audio():
 
 @app.route('/check_session/')
 def check_session():
+    # if user is not logged in
     if 'logged_in' not in session:
         return redirect(url_for('register'))
 
     new_user = NewUserModel()
-    new_user.set_of_text_ids, new_user.initial_num_of_samples = new_user.get_initial_list_of_texts()
+    user_check = new_user.get_text_info_by_user_id()
 
-    # return str(new_user.set_of_text_ids)
-    # return str(new_user.initial_num_of_samples)
+    # if user does not require any more recordings to perform
+    if not user_check:
+        del session['in_recording_session']
+        return render_template("main.html")
 
-    if int(new_user.initial_num_of_samples) >= 9:
-        session.clear()
-        return render_template('login.html')
+    session['in_recording_session'] = True
 
-    # return "Initial number of samples: " + str(new_user.initial_num_of_samples)                       # 3
-    # return "Set of text ID's: " + str(new_user.set_of_text_ids)                                       # Set of text ID's: {100040, 100024, 100000} (3)
-    # return "New user ID: " + str(new_user.user_id)                                                    # 113864
-    # return "Number of total required texts: " + str(new_user.num_of_total_required_texts)             # 3
-    # return "Number of total required recordings: " + str(new_user.num_of_total_required_samples)      # 9
+    # return str(new_user.next_step_text_id)
 
-    # get missing texts
-    while len(new_user.set_of_text_ids) < new_user.num_of_total_required_texts:
-        new_user.set_of_text_ids, new_user.set_of_texts_full = new_user.get_missing_texts()
-        session['texts'] = new_user.set_of_texts_full
+    # user_id = session['user_id']
+    # email = session['email']
+    # merchant_id = session['merchant_id']
+    # next_step_action = 'none'
+    # next_step_phrase = 'none'
+    # next_step_text_id = int
 
-    # return str(new_user.set_of_text_ids)
-    # return str(new_user.set_of_texts_full)
-    # return "Current number of total required texts: " + str(new_user.num_of_total_required_texts)
-    # return "Current number of total required recordings: " + str(new_user.num_of_total_required_samples)
-
-    new_user.set_number_of_missing_samples = new_user.get_missing_samples()
-
-    # return "Set number of missing samples: " + str(new_user.set_number_of_missing_samples)
-
-    session['recordings'] = new_user.set_number_of_missing_samples
-    # session['texts'] = new_user.set_of_texts_full
-
-    # return str(new_user.set_of_text_ids) + str(new_user.set_number_of_missing_samples)
-    # return "Set of texts full: " + str(new_user.set_of_texts_full)
-
-    for each_key, each_value in session['recordings'].items():
-        # return render_template('register_record_voice.html',  message=(each_key, each_value, session['texts'][each_key], session['merchant_id'], session['user_id']))
-        data = (each_key, each_value, session['texts'][each_key], session['merchant_id'], session['user_id'])
-        session['next_recording_data'] = data
-        return redirect(url_for('register_record_voice'))
+    data = (new_user.next_step_text_id,
+            new_user.next_step_phrase,
+            new_user.merchant_id,
+            new_user.user_id,
+            new_user.next_step_text_id)
+    session['next_recording_data'] = data
+    return redirect(url_for('register_record_voice'))
 
 
 # ONLY Error handling below #
