@@ -36,6 +36,7 @@ class Authorization:
                         session['email'] = email
                         session['user_id'] = user_id
                         session['merchant_id'] = merchant_id
+                        session['text_ids_set'] = []
                         # return redirect(url_for('register_record_voice'))
                         # return redirect(url_for('dashboard'))
                         return redirect(url_for('check_session'))
