@@ -75,7 +75,11 @@ def register_save_audio():
         if response_send_wavefile.status_code == 400:
             return "error while sending wavefile to back-end server!", 400
 
-        url_array_upload = f"https://vbiometrics-docker.azurewebsites.net/array_upload/{session['next_recording_data'][3]}/{session['next_recording_data'][4]}/{session['next_recording_data'][0]}/{session['next_filename']}"
+        url_array_upload = f"https://vbiometrics-docker.azurewebsites.net/array_upload/" \
+                           f"{session['next_recording_data'][2]}/{session['next_recording_data'][3]}" \
+                           f"/{session['next_recording_data'][0]}/{session['next_filename']}" \
+                           f"/{session['next_recording_data'][5]}"
+
         response_array_upload = requests.request("POST", url_array_upload)
         if response_array_upload.status_code == 400:
             return "error while sending npy file to database!", 400
@@ -150,8 +154,9 @@ def check_session():
 
     # if user does not require any more recordings to perform
     if not user_check:
-        del session['in_recording_session']
-        return render_template("main.html")
+        if 'in_recording_session' in session:
+            del session['in_recording_session']
+        return redirect(url_for('dashboard'))
 
     session['in_recording_session'] = True
 
@@ -168,7 +173,8 @@ def check_session():
             new_user.next_step_phrase,
             new_user.merchant_id,
             new_user.user_id,
-            new_user.next_step_text_id)
+            new_user.next_step_text_id,
+            new_user.next_step_filename)
     session['next_recording_data'] = data
     return redirect(url_for('register_record_voice'))
 

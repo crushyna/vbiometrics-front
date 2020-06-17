@@ -8,8 +8,10 @@ class NewUserModel:
         self.user_id = session['user_id']
         self.email = session['email']
         self.merchant_id = session['merchant_id']
+
         self.next_step_action = 'none'
         self.next_step_phrase = 'none'
+        self.next_step_filename = 'none'
         self.next_step_text_id = int
 
         # self.initial_num_of_samples = 0
@@ -20,20 +22,22 @@ class NewUserModel:
         # self.set_of_texts_full = {}
 
     def get_text_info_by_user_id(self):
-        url = f"https://vbiometrics-docker.azurewebsites.net/texts/info/byUserId/{self.merchant_id}/{self.user_id}"
+        url = f"https://vbiometrics-docker.azurewebsites.net/samples/info/byUserId/{self.merchant_id}/{self.user_id}"
         response = requests.request("GET", url)
-        if response.status_code not in (200, 201):
+        if response.status_code != 404:
             return {'message': 'Database or connection error! @ get_list_of_texts',
                     'status': 'error'}
 
         response_data = response.json()
 
-        self.next_step_action = response_data['data']['nextStep']['action']
-        if self.next_step_action != "must_create":
+        self.next_step_action = response_data['message']
+        if self.next_step_action == "Success, all samples ready!":
             return False
 
-        self.next_step_phrase = response_data['data']['nextStep']['data']['phrase']
-        self.next_step_text_id = response_data['data']['nextStep']['data']['textId']
+        self.next_step_phrase = response_data['data']['phrase']
+        self.next_step_filename = response_data['data']['sampleFile']
+        self.next_step_text_id = response_data['data']['textId']
+
         return True
 
     def get_initial_list_of_texts(self):
@@ -52,8 +56,8 @@ class NewUserModel:
         return set(text_id_list), len(text_id_list)
 
     def get_missing_texts(self):
-        number_of_missing_texts = self.num_of_total_required_texts - len(self.set_of_text_ids)                  # 3 - 0     3 - 3
-        url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"            # = 6
+        number_of_missing_texts = self.num_of_total_required_texts - len(self.set_of_text_ids)  # 3 - 0     3 - 3
+        url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"  # = 6
         response = requests.request("GET", url)
         if response.status_code not in (200, 201):
             return {'message': 'Database or connection error! @ get_missing_texts',
@@ -67,7 +71,8 @@ class NewUserModel:
             new_texts_id.append(each_element['textId'])
             new_texts_phrases.append(each_element['phrase'])
 
-        self.num_of_total_required_texts = self.num_of_total_required_texts - len(self.set_of_text_ids) - len(set(new_texts_id))        # 3 - 0 - 3     # = 0
+        self.num_of_total_required_texts = self.num_of_total_required_texts - len(self.set_of_text_ids) - len(
+            set(new_texts_id))  # 3 - 0 - 3     # = 0
 
         return set(new_texts_id), dict(zip(set(new_texts_id), set(new_texts_phrases)))
 
@@ -89,7 +94,3 @@ class NewUserModel:
             result_dict.update({each_text_id: 3 - count_sum})
 
         return result_dict
-
-
-
-
