@@ -35,7 +35,6 @@ class NewUserModel:
             return {'message': 'All samples ready!',
                     'status': 'success'}
 
-
         self.next_step_phrase = response_data['data']['phrase']
         self.next_step_filename = response_data['data']['sampleFile']
         self.next_step_text_id = response_data['data']['textId']

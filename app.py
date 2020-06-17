@@ -163,6 +163,9 @@ def check_session():
         if final_result_code not in (200, 201):
             return "Error when uploading image files!"
 
+        session.clear()
+        gc.collect()
+        session['logged_in'] = True
         return redirect(url_for('dashboard'))
 
     session['in_recording_session'] = True
