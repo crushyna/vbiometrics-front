@@ -17,7 +17,7 @@ class Authorization:
                 merchant_id = form.merchant_id.data
                 password = form.password.data
 
-                url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{email}"
+                url = f"https://vbiometrics-docker.azurewebsites.net/check_if_user_exists/{merchant_id}/{email}"
                 response = requests.request("GET", url)
 
                 if response.status_code not in (200, 201):  # if user DOES NOT exist
@@ -30,16 +30,25 @@ class Authorization:
                     response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
 
                     if response.status_code in (200, 201):  # if user added successfully
+                        user_id = response.json()['message']['data']['userId']
                         gc.collect()
                         session['logged_in'] = True
                         session['email'] = email
-                        # return redirect(url_for('registration_record_voice'))
-                        return redirect(url_for('dashboard'))
+                        session['user_id'] = user_id
+                        session['merchant_id'] = merchant_id
+                        session['text_ids_set'] = []
+                        # return redirect(url_for('register_record_voice'))
+                        # return redirect(url_for('dashboard'))
+                        return redirect(url_for('check_session'))
+
+                    elif response.status_code == 409:
+                        flash("User with this email already exists!")
+                        return redirect(url_for('register'))
 
                     else:
                         error = response.json()
                         flash(f"error {error}")
-                        return redirect(url_for('dashboard'))
+                        return redirect(url_for('register'))
 
                 else:
                     flash("That email is already taken, please choose another!")
