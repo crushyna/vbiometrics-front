@@ -31,7 +31,7 @@ class Authorization:
 
                     if response.status_code in (200, 201):  # if user added successfully
                         user_id = response.json()['message']['data']['userId']
-                        gc.collect()
+                        # gc.collect()
                         session['logged_in'] = True
                         session['email'] = email
                         session['user_id'] = user_id

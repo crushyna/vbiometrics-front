@@ -15,7 +15,6 @@ class Authentication:
                 if request.method == 'POST':
                     form_merchant_id = request.form['merchant_id']
                     form_email = request.form['email']
-                    # TODO: change request url to payload
                     url = f"https://vbiometrics-docker.azurewebsites.net/check_if_user_exists/{form_merchant_id}/{form_email}"
                     response = requests.get(url)
 
