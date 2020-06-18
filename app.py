@@ -166,12 +166,13 @@ def check_session():
         session.clear()
         gc.collect()
         session['logged_in'] = True
+        flash("Registration successful.")
+        flash("You are now logged in.")
         return redirect(url_for('dashboard'))
 
     session['in_recording_session'] = True
 
     # return str(new_user.next_step_text_id)
-
     # user_id = session['user_id']
     # email = session['email']
     # merchant_id = session['merchant_id']
