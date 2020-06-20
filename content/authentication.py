@@ -1,4 +1,5 @@
 from flask import request, session, redirect, url_for, render_template, flash
+from helpers.user_check import AuthenticatingUser
 import requests
 import gc
 
@@ -20,14 +21,24 @@ class Authentication:
 
                     if response.status_code not in (200, 201):
                         error = "Email not found! Try again!"
+                        return render_template("authenticate.html", error=error)
 
                     else:
                         session['authorized'] = True
                         session['logged_in'] = True
                         session['email'] = form_email
                         session['merchant_id'] = form_merchant_id
-                        # gc.collect()
-                        return redirect(url_for("record_voice"))
+
+                        randomText = AuthenticatingUser.get_random_text(session['merchant_id'], session['email'])
+                        if randomText['status'] == 'error':
+                            error = str(randomText)
+                            return render_template("authenticate.html", error=error)
+
+                        else:
+                            session['textphrase'] = randomText['message']['data']['textphrase']
+                            session['text_id'] = randomText['message']['data']['text_id']
+                            session['user_id'] = randomText['message']['data']['user_id']
+                            return redirect(url_for("record_voice"))
 
                 gc.collect()
                 return render_template("authenticate.html", error=error)

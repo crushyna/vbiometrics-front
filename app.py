@@ -4,7 +4,7 @@ import datetime
 
 import requests
 from flask import Flask, render_template, flash, url_for, redirect, session, request
-from helpers.user_check import NewUserModel
+from helpers.user_check import NewUserModel, AuthenticatingUser
 from content.authentication import Authentication
 from content.authorization import Authorization
 from content_management import Content
@@ -111,19 +111,33 @@ def record_voice():
 
 @app.route('/audio', methods=['POST'])
 def audio():
-    with open(os.path.join(UPLOAD_FOLDER, 'audio.wav'), 'wb+') as f:
+    session['input_filename'] = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}.wav"
+    with open(os.path.join(UPLOAD_FOLDER, session['input_filename']), 'wb+') as f:
         f.write(request.data)
 
-    if os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav')):
-        session['authenticated'] = True
+    # check if file is created correctly
+    if os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename'])):
+        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
-        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
-        # os.remove(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
+        # send to back-end
+        url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['input_filename']}"
+        files = [('file', open(os.path.join(UPLOAD_FOLDER, session['input_filename']), 'rb'))]
 
-        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
-        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
-    else:
-        return "File not saved!"
+        response_send_wavefile = requests.request("POST", url_upload_wavefile, files=files)
+        if response_send_wavefile.status_code == 400:
+            return "error while sending wavefile to back-end server!", 400
+
+        # send for verification
+        results = AuthenticatingUser.verify_user(session['input_filename'])
+
+        # delete from web browser cache:
+        files = False
+        os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+
+        # check if deleted:
+        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+
+        return results
 
 
 @app.route('/check_session/')
