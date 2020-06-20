@@ -128,16 +128,21 @@ def audio():
             return "error while sending wavefile to back-end server!", 400
 
         # send for verification
-        results = AuthenticatingUser.verify_user(session['input_filename'])
+        session['authentication_results'] = AuthenticatingUser.verify_user(session['input_filename'])
 
         # delete from web browser cache:
         files = False
-        os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+        # os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
-        return results
+        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
+
+
+@app.route('/authenticate/results/')
+def authenticate_results():
+    return render_template('authentication_results.html')
 
 
 @app.route('/check_session/')

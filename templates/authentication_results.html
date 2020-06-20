@@ -1,0 +1,24 @@
+{% extends "recorder_layout.html" %}
+
+{% block body %}
+
+  <body class="text-center" style="background: linear-gradient(to bottom, white 0%, gray 100%)">
+    <div class="form-signin">
+      <img class="img-fluid" src="{{ url_for('static', filename='images/logos/NEW_INV_logo_alone.png') }}" alt="" width="120" height="120">
+      <h1 class="h3 mb-3 font-weight-normal">Results:</h1>
+    <div class="container">
+        <p class="text-dark bg-info font-weight-bold">Thanks for using our software!</p>
+        <p class="text-dark bg-info font-weight-bold">Results: {{session['authentication_results']}}</p>
+        <p class="text-dark bg-danger font-weight-bold">{{error}}</p>
+        <textarea id="output" style="width: 100%;height: 100px" readonly></textarea>
+    </div>
+        <a class="btn btn-primary" href="/" role="button">Proceed</a>
+
+        <script src="{{ url_for('static', filename='default_main.js') }}"></script>
+
+        <p class="mt-5 mb-3 text-muted">&copy; 2019-2020 Malinowski, Wieczorek</p>
+        <a class="btn btn-primary" href="/logout" role="button">Log out</a>
+
+    </div>
+  </body>
+{% endblock %}
