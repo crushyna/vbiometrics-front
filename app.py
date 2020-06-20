@@ -21,8 +21,6 @@ app.secret_key = b'crushyna'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-# TODO: It might be actually good idea to define separate directory for every function down below
-
 def login_required(f):
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
@@ -132,7 +130,7 @@ def audio():
 
         # delete from web browser cache:
         files = False
-        os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+        # os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
