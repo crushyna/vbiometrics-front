@@ -24,8 +24,9 @@ class Authentication:
                     else:
                         session['authorized'] = True
                         session['logged_in'] = True
-                        session['email'] = request.form['email']
-                        gc.collect()
+                        session['email'] = form_email
+                        session['merchant_id'] = form_merchant_id
+                        # gc.collect()
                         return redirect(url_for("record_voice"))
 
                 gc.collect()

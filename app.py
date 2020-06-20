@@ -98,21 +98,6 @@ def register_save_audio():
         return "File not saved!"
 
 
-@app.route('/login/', methods=['GET', 'POST'])
-def login():
-    template = Authorization.login_page()
-    return template
-
-
-@app.route("/logout/")
-@login_required
-def logout():
-    session.clear()
-    flash("You have been logged out!")
-    gc.collect()
-    return redirect(url_for('dashboard'))
-
-
 @app.route("/authenticate/", methods=['GET', 'POST'])
 def authentication():
     template = Authentication.check_email()
@@ -128,9 +113,7 @@ def record_voice():
 def audio():
     with open(os.path.join(UPLOAD_FOLDER, 'audio.wav'), 'wb+') as f:
         f.write(request.data)
-    # proc = run(['ffprobe', '-of', 'default=noprint_wrappers=1', os.path.join(UPLOAD_FOLDER, 'audio.wav')], text=True,
-    #           stderr=PIPE)
-    # return f"File saved: {os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))}"
+
     if os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav')):
         session['authenticated'] = True
 
@@ -157,8 +140,6 @@ def check_session():
         if 'in_recording_session' in session:
             del session['in_recording_session']
 
-        # session['text_ids_set'] = set(session['text_ids_set'])
-        # return str(set(session['text_ids_set']))
         final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
         if final_result_code not in (200, 201):
             return "Error when uploading image files!"
@@ -172,14 +153,6 @@ def check_session():
 
     session['in_recording_session'] = True
 
-    # return str(new_user.next_step_text_id)
-    # user_id = session['user_id']
-    # email = session['email']
-    # merchant_id = session['merchant_id']
-    # next_step_action = 'none'
-    # next_step_phrase = 'none'
-    # next_step_text_id = int
-
     data = (new_user.next_step_text_id,
             new_user.next_step_phrase,
             new_user.merchant_id,
@@ -188,6 +161,21 @@ def check_session():
             new_user.next_step_filename)
     session['next_recording_data'] = data
     return redirect(url_for('register_record_voice'))
+
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    template = Authorization.login_page()
+    return template
+
+
+@app.route("/logout/")
+@login_required
+def logout():
+    session.clear()
+    flash("You have been logged out!")
+    gc.collect()
+    return redirect(url_for('dashboard'))
 
 
 # ONLY Error handling below #
