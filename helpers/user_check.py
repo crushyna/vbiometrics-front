@@ -45,21 +45,6 @@ class NewUserModel:
         return {'message': 'Requires data',
                 'status': 'error'}
 
-    def get_initial_list_of_texts(self):
-        url = f"https://vbiometrics-docker.azurewebsites.net/samples/byUserId/{self.merchant_id}/{self.user_id}"
-        response = requests.request("GET", url)
-        if response.status_code not in (200, 201):
-            return {'message': 'Database or connection error! @ get_list_of_texts',
-                    'status': 'error'}
-
-        response_data = response.json()
-        text_id_list = []
-
-        for each_element in response_data['data']:
-            text_id_list.append(each_element['textId'])
-
-        return set(text_id_list), len(text_id_list)
-
     def generate_images(self, data_set):
         global response
         for each_text_id in data_set:
@@ -70,3 +55,40 @@ class NewUserModel:
             return response.json(), response.status_code
 
         return response.json(), response.status_code
+
+
+class AuthenticatingUser:
+
+    @staticmethod
+    def verify_user(filename: str):
+
+        url = f"https://vbiometrics-docker.azurewebsites.net/verify_voice/{session['merchant_id']}" \
+              f"/{session['email']}" \
+              f"/{session['text_id']}" \
+              f"/{filename}"
+
+        verify_voice_response = requests.request("GET", url)
+
+        if verify_voice_response.status_code == 500:
+            return {'message': 'Back-end server error!',
+                    'status': 'error',
+                    'error': response.json()}
+
+        return verify_voice_response.json()
+
+    @staticmethod
+    def get_random_text(merchant_id: int, user_email: str):
+        url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{merchant_id}/{user_email}"
+        get_text_phrase_response = requests.request("GET", url)
+
+        if get_text_phrase_response.status_code == 404:
+            return {'message': 'User does not exists!',
+                    'status': 'error',
+                    'data': get_text_phrase_response.json()}
+        elif get_text_phrase_response.status_code == 500:
+            return {'message': 'Back-end server error!',
+                    'status': 'error',
+                    'data': get_text_phrase_response.json()}
+
+        else:
+            return get_text_phrase_response.json()

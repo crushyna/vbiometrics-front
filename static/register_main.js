@@ -57,7 +57,6 @@ function doneEncoding(soundBlob) {
                             --time;
                             if (time < 0){
                                 clearInterval(countdown);
-                                // document.location = document.location.protocol+ "//" + document.location.hostname + "/check_session/";
                                 document.location = document.location.protocol+ "//" + document.location.hostname + "/check_session";
                             }
                         }
