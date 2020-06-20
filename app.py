@@ -130,7 +130,7 @@ def audio():
 
         # delete from web browser cache:
         files = False
-        # os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+        os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
