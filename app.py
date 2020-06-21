@@ -73,6 +73,7 @@ def register_save_audio():
         if response_send_wavefile.status_code == 400:
             return "error while sending wavefile to back-end server!", 400
 
+        # upload array to database
         url_array_upload = f"https://vbiometrics-docker.azurewebsites.net/array_upload/" \
                            f"{session['next_recording_data'][2]}/{session['next_recording_data'][3]}" \
                            f"/{session['next_recording_data'][0]}/{session['next_filename']}" \
@@ -94,6 +95,43 @@ def register_save_audio():
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}, send to backend status code: {str(response_send_wavefile.status_code)}, upload npy status code: {str(response_array_upload.status_code)}"
     else:
         return "File not saved!"
+
+
+@app.route('/check_session/')
+def check_session():
+    # if user is not logged in
+    if 'logged_in' not in session:
+        return redirect(url_for('register'))
+
+    new_user = NewUserModel()
+    user_check = new_user.get_text_info_by_user_id()
+
+    # if user does not require any more recordings to perform
+    if user_check['status'] == 'success':
+        if 'in_recording_session' in session:
+            del session['in_recording_session']
+
+        final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
+        if final_result_code not in (200, 201):
+            return "Error when uploading image files!"
+
+        session.clear()
+        gc.collect()
+        session['logged_in'] = True
+        flash("Registration successful.")
+        flash("You are now logged in.")
+        return redirect(url_for('dashboard'))
+
+    session['in_recording_session'] = True
+
+    data = (new_user.next_step_text_id,
+            new_user.next_step_phrase,
+            new_user.merchant_id,
+            new_user.user_id,
+            new_user.next_step_text_id,
+            new_user.next_step_filename)
+    session['next_recording_data'] = data
+    return redirect(url_for('register_record_voice'))
 
 
 @app.route("/authenticate/", methods=['GET', 'POST'])
@@ -141,43 +179,6 @@ def audio():
 @app.route('/authenticate/results/')
 def authenticate_results():
     return render_template('authentication_results.html')
-
-
-@app.route('/check_session/')
-def check_session():
-    # if user is not logged in
-    if 'logged_in' not in session:
-        return redirect(url_for('register'))
-
-    new_user = NewUserModel()
-    user_check = new_user.get_text_info_by_user_id()
-
-    # if user does not require any more recordings to perform
-    if user_check['status'] == 'success':
-        if 'in_recording_session' in session:
-            del session['in_recording_session']
-
-        final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
-        if final_result_code not in (200, 201):
-            return "Error when uploading image files!"
-
-        session.clear()
-        gc.collect()
-        session['logged_in'] = True
-        flash("Registration successful.")
-        flash("You are now logged in.")
-        return redirect(url_for('dashboard'))
-
-    session['in_recording_session'] = True
-
-    data = (new_user.next_step_text_id,
-            new_user.next_step_phrase,
-            new_user.merchant_id,
-            new_user.user_id,
-            new_user.next_step_text_id,
-            new_user.next_step_filename)
-    session['next_recording_data'] = data
-    return redirect(url_for('register_record_voice'))
 
 
 @app.route('/login/', methods=['GET', 'POST'])

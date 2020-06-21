@@ -70,9 +70,9 @@ class AuthenticatingUser:
         verify_voice_response = requests.request("GET", url)
 
         if verify_voice_response.status_code == 500:
-            return {'message': 'Back-end server error!',
+            return {'message': 'Back-end server error @def verify_user!',
                     'status': 'error',
-                    'error': response.json()}
+                    'error': verify_voice_response.json()}
 
         return verify_voice_response.json()
 
@@ -86,7 +86,7 @@ class AuthenticatingUser:
                     'status': 'error',
                     'data': get_text_phrase_response.json()}
         elif get_text_phrase_response.status_code == 500:
-            return {'message': 'Back-end server error!',
+            return {'message': 'Back-end server error @def get_random_text!',
                     'status': 'error',
                     'data': get_text_phrase_response.json()}
 
