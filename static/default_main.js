@@ -47,17 +47,17 @@ function doneEncoding(soundBlob) {
                 if (response.status == 200){
                     console.log(response);
                     paragraph.style.color = "green";
-                    message.innerText = 'No gratki, nagrałeś głos, za niecałe 5 sekund zostaniesz przekierowany do systemu...';
+                    message.innerText = 'No gratki, nagrałeś głos, za niecałe 3 sekund zostaniesz przekierowany do systemu...';
                     let counter = document.createElement('div');
                     paragraph.insertBefore(counter, message.nextElementSibling);
                     counter.style.fontSize = "2em";
-                    let time = 5;
+                    let time = 3;
                         let countdown = setInterval(function () {
                             counter.innerText = time;
                             --time;
                             if (time < 0){
                                 clearInterval(countdown);
-                                document.location = document.location.protocol+ "//" + document.location.hostname + "/dashboard";
+                                document.location = document.location.protocol+ "//" + document.location.hostname + "/authenticate/results";
                             }
                         }
                         ,1000);

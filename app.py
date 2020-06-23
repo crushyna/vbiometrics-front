@@ -4,7 +4,7 @@ import datetime
 
 import requests
 from flask import Flask, render_template, flash, url_for, redirect, session, request
-from helpers.user_check import NewUserModel
+from helpers.user_check import NewUserModel, AuthenticatingUser
 from content.authentication import Authentication
 from content.authorization import Authorization
 from content_management import Content
@@ -20,8 +20,6 @@ app = Flask(__name__)
 app.secret_key = b'crushyna'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
-# TODO: It might be actually good idea to define separate directory for every function down below
 
 def login_required(f):
     def wrap(*args, **kwargs):
@@ -75,6 +73,7 @@ def register_save_audio():
         if response_send_wavefile.status_code == 400:
             return "error while sending wavefile to back-end server!", 400
 
+        # upload array to database
         url_array_upload = f"https://vbiometrics-docker.azurewebsites.net/array_upload/" \
                            f"{session['next_recording_data'][2]}/{session['next_recording_data'][3]}" \
                            f"/{session['next_recording_data'][0]}/{session['next_filename']}" \
@@ -98,19 +97,41 @@ def register_save_audio():
         return "File not saved!"
 
 
-@app.route('/login/', methods=['GET', 'POST'])
-def login():
-    template = Authorization.login_page()
-    return template
+@app.route('/check_session/')
+def check_session():
+    # if user is not logged in
+    if 'logged_in' not in session:
+        return redirect(url_for('register'))
 
+    new_user = NewUserModel()
+    user_check = new_user.get_text_info_by_user_id()
 
-@app.route("/logout/")
-@login_required
-def logout():
-    session.clear()
-    flash("You have been logged out!")
-    gc.collect()
-    return redirect(url_for('dashboard'))
+    # if user does not require any more recordings to perform
+    if user_check['status'] == 'success':
+        if 'in_recording_session' in session:
+            del session['in_recording_session']
+
+        final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
+        if final_result_code not in (200, 201):
+            return "Error when uploading image files!"
+
+        session.clear()
+        gc.collect()
+        session['logged_in'] = True
+        flash("Registration successful.")
+        flash("You are now logged in.")
+        return redirect(url_for('dashboard'))
+
+    session['in_recording_session'] = True
+
+    data = (new_user.next_step_text_id,
+            new_user.next_step_phrase,
+            new_user.merchant_id,
+            new_user.user_id,
+            new_user.next_step_text_id,
+            new_user.next_step_filename)
+    session['next_recording_data'] = data
+    return redirect(url_for('register_record_voice'))
 
 
 @app.route("/authenticate/", methods=['GET', 'POST'])
@@ -126,67 +147,53 @@ def record_voice():
 
 @app.route('/audio', methods=['POST'])
 def audio():
-    with open(os.path.join(UPLOAD_FOLDER, 'audio.wav'), 'wb+') as f:
+    session['input_filename'] = f"{session['email']}_{datetime.datetime.now().strftime('%y%m%d%H%M%S-%f')}.wav"
+    with open(os.path.join(UPLOAD_FOLDER, session['input_filename']), 'wb+') as f:
         f.write(request.data)
-    # proc = run(['ffprobe', '-of', 'default=noprint_wrappers=1', os.path.join(UPLOAD_FOLDER, 'audio.wav')], text=True,
-    #           stderr=PIPE)
-    # return f"File saved: {os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))}"
-    if os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav')):
-        session['authenticated'] = True
 
-        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
-        # os.remove(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
+    # check if file is created correctly
+    if os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename'])):
+        file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
-        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, 'audio.wav'))
+        # send to back-end
+        url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['input_filename']}"
+        files = [('file', open(os.path.join(UPLOAD_FOLDER, session['input_filename']), 'rb'))]
+
+        response_send_wavefile = requests.request("POST", url_upload_wavefile, files=files)
+        if response_send_wavefile.status_code == 400:
+            return "error while sending wavefile to back-end server!", 400
+
+        # send for verification
+        session['authentication_results'] = AuthenticatingUser.verify_user(session['input_filename'])
+
+        # delete from web browser cache:
+        files = False
+        os.remove(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+
+        # check if deleted:
+        file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
-    else:
-        return "File not saved!"
 
 
-@app.route('/check_session/')
-def check_session():
-    # if user is not logged in
-    if 'logged_in' not in session:
-        return redirect(url_for('register'))
+@app.route('/authenticate/results/')
+def authenticate_results():
+    return render_template('authentication_results.html')
 
-    new_user = NewUserModel()
-    user_check = new_user.get_text_info_by_user_id()
 
-    # if user does not require any more recordings to perform
-    if user_check['status'] == 'success':
-        if 'in_recording_session' in session:
-            del session['in_recording_session']
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    template = Authorization.login_page()
+    return template
 
-        # session['text_ids_set'] = set(session['text_ids_set'])
-        # return str(set(session['text_ids_set']))
-        final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
-        if final_result_code not in (200, 201):
-            return "Error when uploading image files!"
 
-        session.clear()
-        gc.collect()
-        session['logged_in'] = True
-        return redirect(url_for('dashboard'))
-
-    session['in_recording_session'] = True
-
-    # return str(new_user.next_step_text_id)
-
-    # user_id = session['user_id']
-    # email = session['email']
-    # merchant_id = session['merchant_id']
-    # next_step_action = 'none'
-    # next_step_phrase = 'none'
-    # next_step_text_id = int
-
-    data = (new_user.next_step_text_id,
-            new_user.next_step_phrase,
-            new_user.merchant_id,
-            new_user.user_id,
-            new_user.next_step_text_id,
-            new_user.next_step_filename)
-    session['next_recording_data'] = data
-    return redirect(url_for('register_record_voice'))
+@app.route("/logout/")
+@login_required
+def logout():
+    session.clear()
+    flash("You have been logged out!")
+    gc.collect()
+    return redirect(url_for('dashboard'))
 
 
 # ONLY Error handling below #

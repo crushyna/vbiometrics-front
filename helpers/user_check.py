@@ -45,21 +45,6 @@ class NewUserModel:
         return {'message': 'Requires data',
                 'status': 'error'}
 
-    def get_initial_list_of_texts(self):
-        url = f"https://vbiometrics-docker.azurewebsites.net/samples/byUserId/{self.merchant_id}/{self.user_id}"
-        response = requests.request("GET", url)
-        if response.status_code not in (200, 201):
-            return {'message': 'Database or connection error! @ get_list_of_texts',
-                    'status': 'error'}
-
-        response_data = response.json()
-        text_id_list = []
-
-        for each_element in response_data['data']:
-            text_id_list.append(each_element['textId'])
-
-        return set(text_id_list), len(text_id_list)
-
     def generate_images(self, data_set):
         global response
         for each_text_id in data_set:
@@ -71,42 +56,39 @@ class NewUserModel:
 
         return response.json(), response.status_code
 
-    def _get_missing_texts(self):
-        number_of_missing_texts = self.num_of_total_required_texts - len(self.set_of_text_ids)  # 3 - 0     3 - 3
-        url = f"https://vbiometrics-docker.azurewebsites.net/texts/random/{number_of_missing_texts}"  # = 6
-        response = requests.request("GET", url)
-        if response.status_code not in (200, 201):
-            return {'message': 'Database or connection error! @ get_missing_texts',
-                    'status': 'error'}
 
-        new_texts_id = []
-        new_texts_phrases = []
-        response_data = response.json()
+class AuthenticatingUser:
 
-        for each_element in response_data['data']['texts']:
-            new_texts_id.append(each_element['textId'])
-            new_texts_phrases.append(each_element['phrase'])
+    @staticmethod
+    def verify_user(filename: str):
 
-        self.num_of_total_required_texts = self.num_of_total_required_texts - len(self.set_of_text_ids) - len(
-            set(new_texts_id))  # 3 - 0 - 3     # = 0
+        url = f"https://vbiometrics-docker.azurewebsites.net/verify_voice/{session['merchant_id']}" \
+              f"/{session['email']}" \
+              f"/{session['text_id']}" \
+              f"/{filename}"
 
-        return set(new_texts_id), dict(zip(set(new_texts_id), set(new_texts_phrases)))
+        verify_voice_response = requests.request("GET", url)
 
-    def _get_missing_samples(self):
-        url = f"https://vbiometrics-docker.azurewebsites.net/samples/byUserId/{self.merchant_id}/{self.user_id}"
-        response = requests.request("GET", url)
-        if response.status_code not in (200, 201):
-            return {'message': 'Database or connection error! @ get_missing_samples',
-                    'status': 'error'}
+        if verify_voice_response.status_code == 500:
+            return {'message': 'Back-end server error @def verify_user!',
+                    'status': 'error',
+                    'error': verify_voice_response.json()}
 
-        response_data = response.json()
-        result_dict = {}
+        return verify_voice_response.json()
 
-        for each_text_id in self.set_of_text_ids:
-            count_sum = 0
-            for each_element in response_data['data']:
-                if each_element['textId'] == each_text_id:
-                    count_sum += 1
-            result_dict.update({each_text_id: 3 - count_sum})
+    @staticmethod
+    def get_random_text(merchant_id: int, user_email: str):
+        url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{merchant_id}/{user_email}"
+        get_text_phrase_response = requests.request("GET", url)
 
-        return result_dict
+        if get_text_phrase_response.status_code == 404:
+            return {'message': 'User does not exists!',
+                    'status': 'error',
+                    'data': get_text_phrase_response.json()}
+        elif get_text_phrase_response.status_code == 500:
+            return {'message': 'Back-end server error @def get_random_text!',
+                    'status': 'error',
+                    'data': get_text_phrase_response.json()}
+
+        else:
+            return get_text_phrase_response.json()
