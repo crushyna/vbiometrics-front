@@ -91,8 +91,10 @@ def register_save_audio():
 
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
+        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}, send to backend status " \
+               f"code: {str(response_send_wavefile.status_code)}, upload npy status" \
+               f" code: {str(response_array_upload.status_code)} "
 
-        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}, send to backend status code: {str(response_send_wavefile.status_code)}, upload npy status code: {str(response_array_upload.status_code)}"
     else:
         return "File not saved!"
 
