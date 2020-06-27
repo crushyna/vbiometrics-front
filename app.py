@@ -38,6 +38,7 @@ def home_page():
 
 
 @app.route('/dashboard/')
+@login_required
 def dashboard():
     return render_template("content_dashboard.html", TOPIC_DICT=TOPIC_DICT)
 
@@ -47,8 +48,8 @@ def register():
     if 'in_recording_session' not in session:
         template = Authorization.register_page()
         return template
-    else:
-        return redirect(url_for('check_session'))
+
+    return redirect(url_for('check_session'))
 
 
 @app.route("/register_record_voice")
@@ -114,6 +115,7 @@ def check_session():
             del session['in_recording_session']
 
         final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
+        del session['in_registration_process']
         if final_result_code not in (200, 201):
             return "Error when uploading image files!"
 
@@ -185,12 +187,14 @@ def authenticate_results():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+    if 'in_registration_process' in session:
+        return redirect(url_for('check_session'))
     template = Authorization.login_page()
     return template
 
 
 @app.route("/logout/")
-@login_required
+# @login_required
 def logout():
     session.clear()
     flash("You have been logged out!")
