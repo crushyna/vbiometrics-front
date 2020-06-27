@@ -104,8 +104,8 @@ def register_save_audio():
 
 @app.route('/check_session/')
 def check_session():
-    # if user is not logged in
-    if 'logged_in' not in session:
+    # if user did not started registration process
+    if 'in_registration_process' not in session:
         return redirect(url_for('register'))
 
     new_user = NewUserModel()

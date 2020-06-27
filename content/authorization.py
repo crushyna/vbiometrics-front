@@ -31,7 +31,7 @@ class Authorization:
 
                     if response.status_code in (200, 201):  # if user added successfully
                         user_id = response.json()['message']['data']['userId']
-                        session['logged_in'] = True
+                        # session['logged_in'] = True
                         session['email'] = email
                         session['user_id'] = user_id
                         session['merchant_id'] = merchant_id
