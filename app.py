@@ -197,11 +197,10 @@ def login():
 
 
 @app.route("/logout/")
-@login_required
 def logout():
     session.clear()
-    flash("You have been logged out!")
     gc.collect()
+    flash("You have been logged out!")
     return redirect(url_for('home_page'))
 
 
