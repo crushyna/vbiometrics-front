@@ -68,7 +68,7 @@ def register_save_audio():
     if os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename'])):
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
 
-        # send to back-end
+        # send wavefile to back-end
         url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['next_filename']}"
         files = [('file', open(os.path.join(UPLOAD_FOLDER, session['next_filename']), 'rb'))]
 
@@ -115,6 +115,7 @@ def check_session():
     if user_check['status'] == 'success':
         if 'in_recording_session' in session:
             del session['in_recording_session']
+            del session['in_registration_process']
 
         final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
         del session['in_registration_process']
