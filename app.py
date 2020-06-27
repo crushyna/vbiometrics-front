@@ -27,8 +27,10 @@ def login_required(f):
             return f(*args, **kwargs)
         else:
             flash("You need to login first")
-            return redirect(url_for('login'))
+            # return redirect(url_for('login'))
+            return render_template("errors/401.html"), 401
 
+    wrap.__name__ = f.__name__
     return wrap
 
 
@@ -194,12 +196,12 @@ def login():
 
 
 @app.route("/logout/")
-# @login_required
+@login_required
 def logout():
     session.clear()
     flash("You have been logged out!")
     gc.collect()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('home_page'))
 
 
 # ONLY Error handling below #
@@ -211,6 +213,11 @@ def page_not_found(e):
 @app.errorhandler(405)
 def method_not_found(e):
     return render_template("errors/405.html"), 405
+
+
+@app.errorhandler(401)
+def method_not_found(e):
+    return render_template("errors/401.html"), 405
 
 
 if __name__ == "__main__":
