@@ -25,10 +25,10 @@
 
         <div class="container-fluid">
             <ul class="nav nav-pills">
-                <li class="nav-item px-4">
-                    <a class="nav-link active bg-warning text-dark" href="/">Home</a>
-                </li>
                 {% if session.logged_in %}
+                <li class="nav-item px-4">
+                    <a class="nav-link active bg-warning text-dark" href="/dashboard">Home</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link bg-light text-dark" href="/logout/">Log out</a>
                 </li>
@@ -38,6 +38,9 @@
                 </li>
                 <li class="nav-item px-2">
                     <a class="nav-link bg-light text-dark" href="/register/">Sign up</a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link bg-warning text-dark" href="/authenticate/">Authenticate</a>
                 </li>
                 {% endif %}
             </ul>

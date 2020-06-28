@@ -31,14 +31,13 @@ class Authorization:
 
                     if response.status_code in (200, 201):  # if user added successfully
                         user_id = response.json()['message']['data']['userId']
-                        # gc.collect()
-                        session['logged_in'] = True
+                        # session['logged_in'] = True
                         session['email'] = email
                         session['user_id'] = user_id
                         session['merchant_id'] = merchant_id
                         session['text_ids_set'] = []
-                        # return redirect(url_for('register_record_voice'))
-                        # return redirect(url_for('dashboard'))
+                        session['in_registration_process'] = True
+
                         return redirect(url_for('check_session'))
 
                     elif response.status_code == 409:

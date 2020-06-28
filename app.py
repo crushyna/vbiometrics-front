@@ -27,8 +27,10 @@ def login_required(f):
             return f(*args, **kwargs)
         else:
             flash("You need to login first")
-            return redirect(url_for('login'))
+            # return redirect(url_for('login'))
+            return render_template("errors/401.html"), 401
 
+    wrap.__name__ = f.__name__
     return wrap
 
 
@@ -38,6 +40,7 @@ def home_page():
 
 
 @app.route('/dashboard/')
+@login_required
 def dashboard():
     return render_template("content_dashboard.html", TOPIC_DICT=TOPIC_DICT)
 
@@ -47,8 +50,8 @@ def register():
     if 'in_recording_session' not in session:
         template = Authorization.register_page()
         return template
-    else:
-        return redirect(url_for('check_session'))
+
+    return redirect(url_for('check_session'))
 
 
 @app.route("/register_record_voice")
@@ -65,7 +68,7 @@ def register_save_audio():
     if os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename'])):
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
 
-        # send to back-end
+        # send wavefile to back-end
         url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['next_filename']}"
         files = [('file', open(os.path.join(UPLOAD_FOLDER, session['next_filename']), 'rb'))]
 
@@ -91,16 +94,18 @@ def register_save_audio():
 
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
+        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}, send to backend status " \
+               f"code: {str(response_send_wavefile.status_code)}, upload npy status" \
+               f" code: {str(response_array_upload.status_code)} "
 
-        return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}, send to backend status code: {str(response_send_wavefile.status_code)}, upload npy status code: {str(response_array_upload.status_code)}"
     else:
         return "File not saved!"
 
 
 @app.route('/check_session/')
 def check_session():
-    # if user is not logged in
-    if 'logged_in' not in session:
+    # if user did not started registration process
+    if 'in_registration_process' not in session:
         return redirect(url_for('register'))
 
     new_user = NewUserModel()
@@ -110,8 +115,10 @@ def check_session():
     if user_check['status'] == 'success':
         if 'in_recording_session' in session:
             del session['in_recording_session']
+            del session['in_registration_process']
 
         final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
+        del session['in_registration_process']
         if final_result_code not in (200, 201):
             return "Error when uploading image files!"
 
@@ -183,17 +190,18 @@ def authenticate_results():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+    if 'in_registration_process' in session:
+        return redirect(url_for('check_session'))
     template = Authorization.login_page()
     return template
 
 
 @app.route("/logout/")
-@login_required
 def logout():
     session.clear()
-    flash("You have been logged out!")
     gc.collect()
-    return redirect(url_for('dashboard'))
+    flash("You have been logged out!")
+    return redirect(url_for('home_page'))
 
 
 # ONLY Error handling below #
@@ -205,6 +213,11 @@ def page_not_found(e):
 @app.errorhandler(405)
 def method_not_found(e):
     return render_template("errors/405.html"), 405
+
+
+@app.errorhandler(401)
+def method_not_found(e):
+    return render_template("errors/401.html"), 405
 
 
 if __name__ == "__main__":
