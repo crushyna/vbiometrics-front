@@ -1,4 +1,6 @@
 from flask import request, session, redirect, url_for, render_template, flash
+
+from helpers.config_parser import ConnectionData
 from helpers.user_check import AuthenticatingUser
 import requests
 import gc
@@ -16,7 +18,7 @@ class Authentication:
                 if request.method == 'POST':
                     form_merchant_id = request.form['merchant_id']
                     form_email = request.form['email']
-                    url = f"https://vbiometrics-docker.azurewebsites.net/check_if_user_exists/{form_merchant_id}/{form_email}"
+                    url = f"{ConnectionData.backend_server_address}/check_if_user_exists/{form_merchant_id}/{form_email}"
                     response = requests.get(url)
 
                     if response.status_code not in (200, 201):
