@@ -117,19 +117,17 @@ def check_session():
     if user_check['status'] == 'success':
         if 'in_recording_session' in session:
             del session['in_recording_session']
+
+            final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
             del session['in_registration_process']
+            if final_result_code not in (200, 201):
+                return "Error when uploading image files!"
 
-        final_result_json, final_result_code = new_user.generate_images(set(session['text_ids_set']))
-        del session['in_registration_process']
-        if final_result_code not in (200, 201):
-            return "Error when uploading image files!"
-
-        session.clear()
-        gc.collect()
-        session['logged_in'] = True
-        flash("Registration successful.")
-        flash("You are now logged in.")
-        return redirect(url_for('dashboard'))
+            session.clear()
+            session['logged_in'] = True
+            flash("Registration successful.")
+            flash("You are now logged in.")
+            return redirect(url_for('dashboard'))
 
     session['in_recording_session'] = True
 
