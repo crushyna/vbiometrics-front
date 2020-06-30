@@ -23,7 +23,7 @@ class Authorization:
 
                 if response.status_code not in (200, 201):  # if user DOES NOT exist
 
-                    url = "{ConnectionData.backend_server_address}/add_new_user/"
+                    url = f"{ConnectionData.backend_server_address}/add_new_user/"
                     payload = {"user_email": email,
                                "merchant_id": int(merchant_id),
                                "password": HashFunctions.calculate_sha512(password)}
@@ -65,7 +65,7 @@ class Authorization:
         error = ''
         try:
             if request.method == 'POST':
-                url = "{ConnectionData.backend_server_address}/user_login/"
+                url = f"{ConnectionData.backend_server_address}/user_login/"
                 payload = {"merchant_id": request.form['merchant_id'],
                            "user_email": request.form['email'],
                            "password": HashFunctions.calculate_sha512(request.form['password'])}
