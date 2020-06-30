@@ -4,6 +4,8 @@ import datetime
 
 import requests
 from flask import Flask, render_template, flash, url_for, redirect, session, request
+
+from helpers.config_parser import ConnectionData
 from helpers.user_check import NewUserModel, AuthenticatingUser
 from content.authentication import Authentication
 from content.authorization import Authorization
@@ -69,7 +71,7 @@ def register_save_audio():
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['next_filename']))
 
         # send wavefile to back-end
-        url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['next_filename']}"
+        url_upload_wavefile = f"{ConnectionData.backend_server_address}/upload_wavefile/{session['next_filename']}"
         files = [('file', open(os.path.join(UPLOAD_FOLDER, session['next_filename']), 'rb'))]
 
         response_send_wavefile = requests.request("POST", url_upload_wavefile, files=files)
@@ -77,7 +79,7 @@ def register_save_audio():
             return "error while sending wavefile to back-end server!", 400
 
         # upload array to database
-        url_array_upload = f"https://vbiometrics-docker.azurewebsites.net/array_upload/" \
+        url_array_upload = f"{ConnectionData.backend_server_address}/array_upload/" \
                            f"{session['next_recording_data'][2]}/{session['next_recording_data'][3]}" \
                            f"/{session['next_recording_data'][0]}/{session['next_filename']}" \
                            f"/{session['next_recording_data'][5]}"
@@ -163,7 +165,7 @@ def audio():
         file_saved_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
 
         # send to back-end
-        url_upload_wavefile = f"https://vbiometrics-docker.azurewebsites.net/upload_wavefile/{session['input_filename']}"
+        url_upload_wavefile = f"{ConnectionData.backend_server_address}/upload_wavefile/{session['input_filename']}"
         files = [('file', open(os.path.join(UPLOAD_FOLDER, session['input_filename']), 'rb'))]
 
         response_send_wavefile = requests.request("POST", url_upload_wavefile, files=files)

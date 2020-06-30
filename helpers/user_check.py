@@ -1,6 +1,8 @@
 from flask import session, redirect, url_for
 import requests
 
+from helpers.config_parser import ConnectionData
+
 
 class NewUserModel:
 
@@ -22,7 +24,7 @@ class NewUserModel:
         # self.set_of_texts_full = {}
 
     def get_text_info_by_user_id(self):
-        url = f"https://vbiometrics-docker.azurewebsites.net/samples/info/byUserId/{self.merchant_id}/{self.user_id}"
+        url = f"{ConnectionData.backend_server_address}/samples/info/byUserId/{self.merchant_id}/{self.user_id}"
         response = requests.request("GET", url)
         if response.status_code not in (200, 404):
             return {'message': 'Database or connection error! @ get_list_of_texts',
@@ -48,7 +50,7 @@ class NewUserModel:
     def generate_images(self, data_set):
         global response
         for each_text_id in data_set:
-            url = f"https://vbiometrics-docker.azurewebsites.net/image_generator/{self.merchant_id}/{self.user_id}/{each_text_id}"
+            url = f"{ConnectionData.backend_server_address}/image_generator/{self.merchant_id}/{self.user_id}/{each_text_id}"
             response = requests.request("POST", url)
 
         if response.status_code not in (200, 201):
@@ -62,7 +64,7 @@ class AuthenticatingUser:
     @staticmethod
     def verify_user(filename: str):
 
-        url = f"https://vbiometrics-docker.azurewebsites.net/verify_voice/{session['merchant_id']}" \
+        url = f"{ConnectionData.backend_server_address}/verify_voice/{session['merchant_id']}" \
               f"/{session['email']}" \
               f"/{session['text_id']}" \
               f"/{filename}"
@@ -78,7 +80,7 @@ class AuthenticatingUser:
 
     @staticmethod
     def get_random_text(merchant_id: int, user_email: str):
-        url = f"https://vbiometrics-docker.azurewebsites.net/get_text_phrase/{merchant_id}/{user_email}"
+        url = f"{ConnectionData.backend_server_address}/get_text_phrase/{merchant_id}/{user_email}"
         get_text_phrase_response = requests.request("GET", url)
 
         if get_text_phrase_response.status_code == 404:

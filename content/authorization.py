@@ -2,6 +2,7 @@ import gc
 import requests
 from flask import request, flash, session, url_for, redirect, render_template, json
 from content.forms.registration_form import RegistrationForm
+from helpers.config_parser import ConnectionData
 from helpers.hashfunctions import HashFunctions
 
 
@@ -17,12 +18,12 @@ class Authorization:
                 merchant_id = form.merchant_id.data
                 password = form.password.data
 
-                url = f"https://vbiometrics-docker.azurewebsites.net/check_if_user_exists/{merchant_id}/{email}"
+                url = f"{ConnectionData.backend_server_address}/check_if_user_exists/{merchant_id}/{email}"
                 response = requests.request("GET", url)
 
                 if response.status_code not in (200, 201):  # if user DOES NOT exist
 
-                    url = "https://vbiometrics-docker.azurewebsites.net/add_new_user/"
+                    url = "{ConnectionData.backend_server_address}/add_new_user/"
                     payload = {"user_email": email,
                                "merchant_id": int(merchant_id),
                                "password": HashFunctions.calculate_sha512(password)}
@@ -64,7 +65,7 @@ class Authorization:
         error = ''
         try:
             if request.method == 'POST':
-                url = "https://vbiometrics-docker.azurewebsites.net/user_login/"
+                url = "{ConnectionData.backend_server_address}/user_login/"
                 payload = {"merchant_id": request.form['merchant_id'],
                            "user_email": request.form['email'],
                            "password": HashFunctions.calculate_sha512(request.form['password'])}
