@@ -8,16 +8,14 @@
       <h1 class="h3 mb-3 font-weight-normal">Results:</h1>
     <div class="container">
         <p class="text-dark bg-info font-weight-bold">Thanks for using our software!</p>
-        <p class="text-dark bg-info font-weight-bold">Results: {{session['authentication_results']}}</p>
+        <p class="text-dark bg-info font-weight-bold">Result: {{session['authentication_results']}}</p>
         <p class="text-dark bg-danger font-weight-bold">{{error}}</p>
-        <textarea id="output" style="width: 100%;height: 100px" readonly></textarea>
     </div>
         <a class="btn btn-primary" href="/" role="button">Proceed</a>
 
         <script src="{{ url_for('static', filename='default_main.js') }}"></script>
 
         <p class="mt-5 mb-3 text-muted">&copy; 2019-2020 Malinowski, Wieczorek</p>
-        <a class="btn btn-primary" href="/logout" role="button">Log out</a>
 
     </div>
   </body>

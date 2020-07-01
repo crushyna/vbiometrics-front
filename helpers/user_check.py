@@ -76,7 +76,7 @@ class AuthenticatingUser:
                     'status': 'error',
                     'error': verify_voice_response.json()}
 
-        return verify_voice_response.json()
+        return verify_voice_response.json(), verify_voice_response.status_code
 
     @staticmethod
     def get_random_text(merchant_id: int, user_email: str):

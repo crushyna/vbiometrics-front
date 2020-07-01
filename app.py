@@ -171,7 +171,7 @@ def audio():
             return "error while sending wavefile to back-end server!", 400
 
         # send for verification
-        session['authentication_results'] = AuthenticatingUser.verify_user(session['input_filename'])
+        session['authentication_results'], response_status_code = AuthenticatingUser.verify_user(session['input_filename'])
 
         # delete from web browser cache:
         files = False
@@ -179,6 +179,11 @@ def audio():
 
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
+        if response_status_code == 200:
+            session['authentication_results'] = "Authenticated!"
+            session['logged_in'] = True
+        else:
+            session['authentication_results'] = "Rejected!"
 
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
 
@@ -202,6 +207,16 @@ def logout():
     gc.collect()
     flash("You have been logged out!")
     return redirect(url_for('home_page'))
+
+
+@app.route('/about')
+def about():
+    return render_template("about.html")
+
+
+@app.route('/contact_us')
+def contact_us():
+    return render_template("contact_us.html")
 
 
 # ONLY Error handling below #
