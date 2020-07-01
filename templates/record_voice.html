@@ -14,16 +14,10 @@
             <button id="start" class="btn btn-success" onclick="startRecording()" disabled>Start</button>
             <button id="stop" class="btn btn-danger" onclick="stopRecording()" disabled>Stop</button>
         </p>
-        <p class="text-dark bg-warning font-weight-bold">Text ID: {{session['text_id']}}</p>
-        <p class="text-dark bg-warning font-weight-bold">Text-phrase: {{session['textphrase']}}</p>
-        <p class="text-dark bg-info font-weight-bold">merchant_id: {{session['merchant_id']}}</p>
-        <p class="text-dark bg-info font-weight-bold">user_id: {{session['user_id']}}</p>
+        <p class="text-dark bg-warning font-weight-bold">{{session['textphrase']}}</p>
         <p class="text-dark bg-danger font-weight-bold">{{error}}</p>
-        <textarea id="output" style="width: 100%;height: 100px" readonly></textarea>
     </div>
         {% else %}
-        <a class="btn btn-primary" href="/" role="button">Proceed</a>
-        <a class="btn btn-primary" href="/record_voice" role="button">Next recording</a>
         {% endif %}
 
     <script src="{{ url_for('static', filename='recorder.js') }}"></script>
@@ -31,9 +25,7 @@
     <script src="{{ url_for('static', filename='default_main.js') }}"></script>
 
         {% if session.authenticated %}
-        <p class="mt-5 mb-3 text-muted">&copy; 2019-2020 Malinowski, Wieczorek</p>
         {% else %}
-        <a href="/register/" class="text-dark">No account? Sign up here!</a>
         <p class="mt-5 mb-3 text-muted">&copy; 2019-2020 Malinowski, Wieczorek</p>
         <a class="btn btn-primary" href="/" role="button">Return to Homepage</a>
         {% endif %}
