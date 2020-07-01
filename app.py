@@ -180,7 +180,10 @@ def audio():
         # check if deleted:
         file_deleted_flag = os.path.isfile(os.path.join(UPLOAD_FOLDER, session['input_filename']))
         if response_status_code == 200:
+            session['authentication_results'] = "Authenticated!"
             session['logged_in'] = True
+        else:
+            session['authentication_results'] = "Rejected!"
 
         return f"File saved: {file_saved_flag}, file exist after delete: {file_deleted_flag}"
 
