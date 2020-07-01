@@ -26,7 +26,6 @@ class Authentication:
                         return render_template("authenticate.html", error=error)
 
                     else:
-                        session['authorized'] = True
                         session['email'] = form_email
                         session['merchant_id'] = form_merchant_id
 
