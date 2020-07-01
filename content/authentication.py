@@ -27,7 +27,6 @@ class Authentication:
 
                     else:
                         session['authorized'] = True
-                        session['logged_in'] = True
                         session['email'] = form_email
                         session['merchant_id'] = form_merchant_id
 

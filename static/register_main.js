@@ -47,7 +47,7 @@ function doneEncoding(soundBlob) {
                 if (response.status == 200){
                     console.log(response);
                     paragraph.style.color = "green";
-                    message.innerText = 'No gratki, nagrałeś głos, za niecałe 3 sekund zostaniesz przekierowany do systemu...';
+                    message.innerText = 'Voice recorded! Redirect in...';
                     let counter = document.createElement('div');
                     paragraph.insertBefore(counter, message.nextElementSibling);
                     counter.style.fontSize = "2em";
